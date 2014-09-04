@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Testing</title>
+	
+	<script src="dl.min.js"></script>
+
+	<script>
+
+		(function (window) {
+
+		
+			var HookExceptions = function (config) {
+
+				var self = this,
+					oldOnError = window.onerror,
+					api;
+		
+				if (!config || config.constructor !== Object) {
+					console.warn('No valid config passed to HookExceptions.');
+					return false;
+				}
+
+				if (!config.hook || config.hook.constructor !== Object) {
+					console.warn('No valid Hook config passed to HookExceptions.');
+					return false;
+				}
+				
+				api = new DL.Client(config.hook);
+
+				window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorReference) {
+
+					var stack,
+						errorReport,
+						x, y;
+
+					if (!!errorReference) {
+
+						if (!!Error && errorReference instanceof Error) {
+							stack = errorReference.stack;
+						} else if (errorReference.constructor === String) {
+							stack = errorReference;
+						} else {
+							stack = errorReference.toString();
+						}
+
+					}
+
+					errorReport = {
+
+						message: errorMsg,
+						url: url,
+						line: lineNumber,
+						column: columnNumber,
+						stack: stack
+
+					};
+					
+					if (!!config.extraInfo && config.extraInfo.constructor === Object) {
+
+						for (x in config.extraInfo) {
+
+							if (config.extraInfo.hasOwnProperty(x)) {
+
+								y = config.extraInfo[x];
+
+								if (!!y && y.constructor === Function) {
+									y = y();
+								}
+
+								errorReport[x] = y;
+
+							}
+
+						}
+
+					}
+
+					api.collection('hook_client_exceptions').create(errorReport);
+
+					self.errors.push([errorMsg, url, lineNumber, columnNumber, stack]);
+
+				 	if (oldOnError) {
+						return gOldOnError(errorMsg, url, lineNumber, columnNumber, errorReference);				  	
+				  	}
+					
+					return false;
+
+				}
+
+				this.config = config;
+				this.errors = [];
+				this.ignoresOn = [];
+				this.urgentsOn = [];
+
+				return this;
+
+			}
+
+			HookExceptions.prototype.ignoreOnMatch = function(regEx) {
+
+				return this;
+			}
+
+			HookExceptions.prototype.urgentOnMatch = function(regEx) {
+
+
+				return this;
+			}
+
+
+			window.HookExceptions = HookExceptions;
+
+		})(window);
+
+
+		var hE = new HookExceptions({
+
+			hook: {
+			  url:   "http://dl-api.ddll.co",
+			  appId: 71,
+			  key: '44d19a1727d7c520dae23a44111f7278',
+			  name: 'lays-tour-ddll'
+			},
+
+			extraInfo: {
+
+				commitHash: '788df27b84c445bcf60ac5bf01326e03d36697b9',
+				customTimeStamp: function () {
+
+					return Date.now() / 3.3;
+
+				}
+
+			}
+
+		});
+
+	</script>
+
+</head>
+<body>
+	
+	<button id="error_button">Click here for an error.</button>
+
+
+	<script>
+
+		error_button.addEventListener('click', function (){
+
+			a + b;
+
+		});
+
+	</script>
+
+	<script>
+
+
+		// Do not register a error;
+		try {
+			unssetedObj.name = 123;
+		} catch (e) {
+			// but yes a custom one.
+
+			
+		}
+
+		// causes a error
+		window.heyman.go();
+
+	</script>
+	
+	<script src="external-script.js"></script>
+
+</body>
+</html>
