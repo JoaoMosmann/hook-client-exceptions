@@ -128,6 +128,21 @@
 		return this;
 
 	}
+	
+	/**
+	 * Set exceptions config.
+	 * 
+	 * options:
+	 *   - logLimit (int)
+	 *   - keepErrors (bool)
+	 *   - extraInfo (object)
+	 * 
+	 * @method setConfig
+	 */
+	HookExceptions.prototype.setConfig = function(config) {
+		this.config = config;
+		return this;
+	}
 
 	HookExceptions.prototype.ignoreOnMatch = function(v) {
 
