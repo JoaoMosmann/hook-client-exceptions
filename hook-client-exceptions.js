@@ -81,7 +81,7 @@
 					message: errorMsg,
 					url: url,
 					line: lineNumber,
-er					column: columnNumber,
+					column: columnNumber,
 					stack: stack,
 					agent: navigator.userAgent
 
