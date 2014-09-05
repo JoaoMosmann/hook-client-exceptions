@@ -15,7 +15,7 @@ Here some examples of how use all it's functionalities.
 
 ### Instantiating and some configurations
 
-This helper should be loaded after hook-javascript. The exceptions will be at the ```hook.Client``` instance.
+This helper should be loaded after [hook-javascript]. The exceptions will be at the ```hook.Client``` instance.
 
 ```js
 var hook = new Hook.Client( [...] );
@@ -55,12 +55,11 @@ hook.exceptions.ignoreOnMatch(/undefined/);
 // This one ignores all errors that come from the file my-safe-script.js
 hook.exceptions.ignoreOnMatch(function (errorMsg, url, lineNumber, columnNumber, errorReference) {
     
-    if (url.search('my-safe-script.js')) {
+    if (url.search('my-safe-script.js') > -1) {
         return true;
     }
     
 });
-
 ```
 
 ### Adding extra information
@@ -80,8 +79,6 @@ You may want to log some extra information to be logged with your error, as a se
 
 	}
 );
-
-
 ```
 
 License
