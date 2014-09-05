@@ -82,7 +82,8 @@
 					url: url,
 					line: lineNumber,
 					column: columnNumber,
-					stack: stack
+					stack: stack,
+					agent: navigator.userAgent
 
 				};
 				
