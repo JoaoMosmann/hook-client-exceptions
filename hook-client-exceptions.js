@@ -1,36 +1,29 @@
 (function (window) {
 	"use strict";
 
-	var HookExceptions = function (config) {
-
+	var HookExceptions = function (client) {
 		var self = this,
 			/*
 				Keeps old onerror event. In case it exists, execute it after processing the error.
 			*/
-			oldOnError = window.onerror,
-			api;
+			oldOnError = window.onerror;
 
-		/*
-			Basic configuration necessary.
-		*/
-		if (!config || config.constructor !== Object) {
-			console.warn('No valid config passed to HookExceptions.');
-			return false;
-		}
-
-		if (!config.hook || config.hook.constructor !== Object) {
-			console.warn('No valid Hook config passed to HookExceptions.');
-			return false;
-		}
+		// Keep hook client reference
+		this.client = client;
 		
-		
+		// Default config values
+		this.setConfig({
+			logLimit: 0,
+			keepErrors: false,
+			ignoresOn: []
+		});
 
 		window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorReference) {
 
 			var stack = '',
 				errorReport,
 				ignoreError = false,
-				igLength = self.ignoresOn.length,
+				igLength = self.config.ignoresOn.length,
 				igVa, x, y, z;
 
 			/*
@@ -48,8 +41,8 @@
 
 			}
 
-			
-			if (!!self.logLimit && self.errorCounter > self.logLimit) {
+
+			if (!!self.config.logLimit && self.errorCounter > self.config.logLimit) {
 
 				ignoreError = true;
 
@@ -73,7 +66,7 @@
 				}
 
 			}
-			
+
 			if(!ignoreError) {
 
 				errorReport = {
@@ -86,7 +79,7 @@
 					agent: navigator.userAgent
 
 				};
-				
+
 				/*
 					Added custom information to the error log.
 				*/
@@ -109,12 +102,12 @@
 					}
 
 				}
-				
-				api.collection('hook_client_exceptions').create(errorReport);
+
+				self.client.collection('hook_client_exceptions').create(errorReport);
 
 				self.errorCounter += 1;
 
-				if (self.keepErrors) {
+				if (self.config.keepErrors) {
 
 					self.errors.push([errorMsg, url, lineNumber, columnNumber, stack]);
 
@@ -124,33 +117,44 @@
 
 
 		 	if (oldOnError) {
-				return oldOnError(errorMsg, url, lineNumber, columnNumber, errorReference);				  	
+				return oldOnError(errorMsg, url, lineNumber, columnNumber, errorReference);
 		  	}
-			
+
 			return false;
 
 		}
 
 		this.errorCounter = 0;
-		this.logLimit = config.logLimit || 0;
-		this.keepErrors = config.keepErrors || false;
-
-
-		this.config = config;
 		this.errors = [];
-		this.ignoresOn = [];
 
 		return this;
 
+	}
+	
+	/**
+	 * Set exceptions config.
+	 * 
+	 * options:
+	 *   - logLimit (int)
+	 *   - keepErrors (bool)
+	 *   - extraInfo (object)
+	 *   - ignoresOn (array)
+	 * 
+	 * @method setConfig
+	 */
+	HookExceptions.prototype.setConfig = function(config) {
+		this.config = config;
+		return this;
 	}
 
 	HookExceptions.prototype.ignoreOnMatch = function(v) {
 
-		this.ignoresOn.push(v);
+		this.config.ignoresOn.push(v);
 
 		return this;
 	}
 
-	window.HookExceptions = HookExceptions;
+	// Register 'exceptions' plugin.
+	Hook.Plugin.Manager.register('exceptions', HookExceptions);
 
 })(window);
