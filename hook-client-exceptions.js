@@ -10,13 +10,20 @@
 
 		// Keep hook client reference
 		this.client = client;
+		
+		// Default config values
+		this.setConfig({
+			logLimit: 0,
+			keepErrors: false,
+			ignoresOn: []
+		});
 
 		window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorReference) {
 
 			var stack = '',
 				errorReport,
 				ignoreError = false,
-				igLength = self.ignoresOn.length,
+				igLength = self.config.ignoresOn.length,
 				igVa, x, y, z;
 
 			/*
@@ -35,7 +42,7 @@
 			}
 
 
-			if (!!self.logLimit && self.errorCounter > self.logLimit) {
+			if (!!self.config.logLimit && self.errorCounter > self.config.logLimit) {
 
 				ignoreError = true;
 
@@ -99,7 +106,7 @@
 
 				self.errorCounter += 1;
 
-				if (self.keepErrors) {
+				if (self.config.keepErrors) {
 
 					self.errors.push([errorMsg, url, lineNumber, columnNumber, stack]);
 
@@ -117,13 +124,7 @@
 		}
 
 		this.errorCounter = 0;
-		this.logLimit = config.logLimit || 0;
-		this.keepErrors = config.keepErrors || false;
-
-
-		this.config = config;
 		this.errors = [];
-		this.ignoresOn = [];
 
 		return this;
 
@@ -136,6 +137,7 @@
 	 *   - logLimit (int)
 	 *   - keepErrors (bool)
 	 *   - extraInfo (object)
+	 *   - ignoresOn (array)
 	 * 
 	 * @method setConfig
 	 */
@@ -146,7 +148,7 @@
 
 	HookExceptions.prototype.ignoreOnMatch = function(v) {
 
-		this.ignoresOn.push(v);
+		this.config.ignoresOn.push(v);
 
 		return this;
 	}
