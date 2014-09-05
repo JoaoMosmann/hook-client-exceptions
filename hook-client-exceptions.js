@@ -81,8 +81,9 @@
 					message: errorMsg,
 					url: url,
 					line: lineNumber,
-					column: columnNumber,
-					stack: stack
+er					column: columnNumber,
+					stack: stack,
+					agent: navigator.userAgent
 
 				};
 				
