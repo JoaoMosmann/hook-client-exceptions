@@ -14,16 +14,14 @@ A very simple helper to log errors using [hook] plataform.
 Here some examples of how use all it's functionalities.
 
 ### Instantiating and some configurations
+
+This helper should be loaded after hook-javascript. The exceptions will be at the ```hook.Client``` instance.
+
 ```js
-new HookExceptions({
-    // Hook server info is required.
-    hook: {
-        url:    [...],
-        appId:  [...],
-        key:    [...],
-        name:   [...]
-	},
-);
+var hook = new Hook.Client( [...] );
+
+// Setting configuration to the helper.
+hook.exceptions.setConfig( [...] );
 ```
 
 ### Putting limits
@@ -34,7 +32,7 @@ Also, you can set to the helper using the config property ``keepErrors`` to save
 
 
 ```js
-new HookExceptions({
+hook.exceptions.setConfig({
     hook: [...],
     // Limits error logs sent to the server up to 30
     logLimit: 30,
@@ -51,15 +49,11 @@ Using the method ``ignoreOnMatch`` you can use either a **RegEx** or a **Functio
 The difference between using a **RegEx** and the **Function** parameters is that a **RegEx** only matches to the error message and to the stack information. But passing a **Function** you have access to all information the the event **onerror** provides, making it better for complex decisions.
 
 ```js
-var HE = new HookExceptions({
-    hook: [...]
-);
-
 // This will ignore all errors of the kind "Cannot read property 'x' of undefined"
-HE.ignoreOnMatch(/undefined/);
+hook.exceptions.ignoreOnMatch(/undefined/);
 
 // This one ignores all errors that come from the file my-safe-script.js
-HE.ignoreOnMatch(function (errorMsg, url, lineNumber, columnNumber, errorReference) {
+hook.exceptions.ignoreOnMatch(function (errorMsg, url, lineNumber, columnNumber, errorReference) {
     
     if (url.search('my-safe-script.js')) {
         return true;
@@ -73,7 +67,7 @@ HE.ignoreOnMatch(function (errorMsg, url, lineNumber, columnNumber, errorReferen
 
 You may want to log some extra information to be logged with your error, as a session token, UserAgent or a commithash. 
 ```js
- new HookExceptions({
+ hook.exceptions.setConfig({
     hook: [...],
     extraInfo: {
         // This adds a commitHash to all errors log.
@@ -97,3 +91,4 @@ MIT
 
 
 [hook]:https://github.com/doubleleft/hook
+[hook-javascript]:https://github.com/doubleleft/hook-javascript
