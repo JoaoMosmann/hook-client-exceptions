@@ -1,29 +1,15 @@
 (function (window) {
 	"use strict";
 
-	var HookExceptions = function (config) {
-
+	var HookExceptions = function (client) {
 		var self = this,
 			/*
 				Keeps old onerror event. In case it exists, execute it after processing the error.
 			*/
-			oldOnError = window.onerror,
-			api;
+			oldOnError = window.onerror;
 
-		/*
-			Basic configuration necessary.
-		*/
-		if (!config || config.constructor !== Object) {
-			console.warn('No valid config passed to HookExceptions.');
-			return false;
-		}
-
-		if (!config.hook || config.hook.constructor !== Object) {
-			console.warn('No valid Hook config passed to HookExceptions.');
-			return false;
-		}
-		
-		
+		// Keep hook client reference
+		this.client = client;
 
 		window.onerror = function (errorMsg, url, lineNumber, columnNumber, errorReference) {
 
@@ -48,7 +34,7 @@
 
 			}
 
-			
+
 			if (!!self.logLimit && self.errorCounter > self.logLimit) {
 
 				ignoreError = true;
@@ -73,7 +59,7 @@
 				}
 
 			}
-			
+
 			if(!ignoreError) {
 
 				errorReport = {
@@ -85,7 +71,7 @@
 					stack: stack
 
 				};
-				
+
 				/*
 					Added custom information to the error log.
 				*/
@@ -108,8 +94,8 @@
 					}
 
 				}
-				
-				api.collection('hook_client_exceptions').create(errorReport);
+
+				self.client.collection('hook_client_exceptions').create(errorReport);
 
 				self.errorCounter += 1;
 
@@ -123,9 +109,9 @@
 
 
 		 	if (oldOnError) {
-				return oldOnError(errorMsg, url, lineNumber, columnNumber, errorReference);				  	
+				return oldOnError(errorMsg, url, lineNumber, columnNumber, errorReference);
 		  	}
-			
+
 			return false;
 
 		}
@@ -150,6 +136,7 @@
 		return this;
 	}
 
-	window.HookExceptions = HookExceptions;
+	// Register 'exceptions' plugin.
+	Hook.Plugin.Manager.register('exceptions', HookExceptions);
 
 })(window);
